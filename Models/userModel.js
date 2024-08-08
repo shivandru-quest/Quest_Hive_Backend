@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const roles = ["super admin", "developer", "ui ux designer", "project manager"];
+const roles = ["Super Admin", "Developer", "Ui Ux Designer", "Project Manager"];
 const userSchema = new mongoose.Schema(
   {
     firstname: {
