@@ -33,6 +33,10 @@ const userSchema = new mongoose.Schema(
       required: true,
       enum: roles,
     },
+    avatar: {
+      type: String,
+      trim: true,
+    },
   },
   {
     versionKey: false,

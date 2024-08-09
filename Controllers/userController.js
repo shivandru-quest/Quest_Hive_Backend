@@ -18,4 +18,15 @@ const registerUser = async (req, res) => {
   }
 };
 
-module.exports = { registerUser };
+const getUsers = async (req, res) => {
+  try {
+    const users = await UserModel.find();
+    res.status(200).send({ status: `Success`, users });
+  } catch (error) {
+    res
+      .status(500)
+      .send({ status: `Internal Server Error`, msg: error.message });
+  }
+};
+
+module.exports = { registerUser, getUsers };

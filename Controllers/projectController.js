@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const { ProjectModel } = require("../Models/projectModel");
 
 const createProject = async (req, res) => {
@@ -43,4 +44,29 @@ const createProject = async (req, res) => {
   }
 };
 
-module.exports = { createProject };
+const getProjects = async (req, res) => {
+  try {
+    const role = req.role;
+    const userId = req.userId;
+    const objectId = new mongoose.Types.ObjectId(userId);
+    if (!role || !userId) {
+      return res.status(401).send(`Unauthorized: Role or userId not set`);
+    }
+    let projects;
+    if (role === "Super Admin" || role === "Project Manager") {
+      projects = await ProjectModel.find();
+    } else if (role === "Developer" || role === "Ui Ux Designer") {
+      projects = await ProjectModel.find({ assignee: objectId });
+    } else {
+      return res.status(403).send(`Forbidden: Access denied for role ${role}`);
+    }
+    res.status(200).send({ status: `Success`, projects });
+  } catch (error) {
+    res.status(500).send({
+      status: "An error occurred.",
+      msg: error.message,
+    });
+  }
+};
+
+module.exports = { createProject, getProjects };
