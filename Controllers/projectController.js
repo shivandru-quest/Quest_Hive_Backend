@@ -52,15 +52,34 @@ const getProjects = async (req, res) => {
     if (!role || !userId) {
       return res.status(401).send(`Unauthorized: Role or userId not set`);
     }
+    let page = parseInt(req.query.page) || 1;
+    let limit = parseInt(req.query.limit) || 3;
+    const sortBy = req.query.sortBy || "priority";
+    const sortOrder = req.query.sortOrder === "desc" ? -1 : 1;
     let projects;
+    let projectQuery = {};
     if (role === "Super Admin" || role === "Project Manager") {
-      projects = await ProjectModel.find();
+      projectQuery = {};
     } else if (role === "Developer" || role === "Ui Ux Designer") {
-      projects = await ProjectModel.find({ assignee: objectId });
+      projectQuery = { assignee: objectId };
     } else {
       return res.status(403).send(`Forbidden: Access denied for role ${role}`);
     }
-    res.status(200).send({ status: `Success`, projects });
+    const totalProjects = await ProjectModel.countDocuments(projectQuery);
+    projects = await ProjectModel.find(projectQuery)
+      .sort({ [sortBy]: sortOrder })
+      .skip((page - 1) * limit)
+      .limit(limit);
+    res.status(200).send({
+      status: `Success`,
+      projects,
+      pagination: {
+        total: totalProjects,
+        page,
+        limit,
+        totalPages: Math.ceil(totalProjects / limit),
+      },
+    });
   } catch (error) {
     res.status(500).send({
       status: "An error occurred.",
